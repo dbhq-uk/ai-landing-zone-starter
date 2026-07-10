@@ -1,0 +1,54 @@
+name: terraform
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: fmt · validate · lint · scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: terraform init (no backend)
+        run: terraform init -backend=false
+
+      - name: terraform validate
+        run: terraform validate -no-color
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: tflint
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tflint --init
+          tflint -f compact
+
+      - name: trivy iac scan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy config --severity HIGH,CRITICAL --exit-code 1 --skip-dirs .terraform .
+
+      - name: gitleaks
+        run: |
+          url=$(curl -sSfL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep -o 'https://[^"]*linux_x64.tar.gz' | head -1)
+          curl -sSfL "$url" -o gl.tgz
+          tar -xzf gl.tgz gitleaks
+          ./gitleaks detect --source . --redact --no-banner --exit-code 1

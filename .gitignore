@@ -1,0 +1,24 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfplan
+
+# Variables may hold real ids - keep only the example
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Override files are local-only by convention
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI config
+.terraformrc
+terraform.rc
+
+# The provider lock file .terraform.lock.hcl IS committed - do not ignore it
