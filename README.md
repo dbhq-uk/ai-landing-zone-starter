@@ -33,8 +33,8 @@ graph TD
       subgraph FOUNDRY["Azure AI Foundry"]
         ACCT["Foundry account"]
         PROJ["Project: Secure RAG"]
-        GPT["gpt-4.1 - GlobalStandard"]
-        EMB["text-embedding-3-large - GlobalStandard"]
+        GPT["gpt-5-mini - GlobalStandard"]
+        EMB["text-embedding-3-small - GlobalStandard"]
       end
 
       SEARCH["AI Search - Basic x1 (RAG index)"]
@@ -75,7 +75,7 @@ Dashed nodes are money-pit or unneeded resources the pattern module deploys by d
 | Component | State | Why |
 | --- | --- | --- |
 | AI Foundry account + project | **On** | The workload. |
-| gpt-4.1 + text-embedding-3-large | **On** | Chat + embeddings for RAG, both GlobalStandard (pay-per-token). |
+| gpt-5-mini + text-embedding-3-small | **On** | Chat + embeddings for RAG, both GlobalStandard (pay-per-token). |
 | AI Search (Basic, 1 replica) | **On** | The retrieval index. The one component with no cheaper private-capable tier. |
 | Key Vault + Storage (Foundry BYOR) | **On** | Foundation the Foundry account requires. |
 | Container Apps environment | **On** | Where the RAG app runs; Consumption profile, near-zero idle. |
@@ -105,7 +105,7 @@ Each row is a deliberate departure from the pattern module's defaults. "Default"
 | **Single search, not two** | Both a Foundry BYOR search **and** a top-level knowledge search | One (the Foundry BYOR search, wired to the project) | The module's examples stand up two AI Search services. One index, connected to the project, is what RAG needs. |
 | **Edge appliances off** | Firewall/Bastion/VMs default on once standalone | All off via flags | None are needed for a deploy-capture-destroy demo; each is a standing cost. |
 | **App Gateway stub always forwarded** | `app_gateway_definition` defaults to `null` | A complete `deploy = false` stub in `locals.tf` | The module reads `.deploy` without `try()`, so a null value errors at plan time and the object carries five required maps. The wrapper always forwards a valid stub and only toggles `deploy`. |
-| **GlobalStandard models only** | No models deployed | gpt-4.1 + text-embedding-3-large, GlobalStandard | GlobalStandard is pay-per-token. `ProvisionedManaged` (PTU) is a four-figure monthly commitment and is never selected. |
+| **GlobalStandard models only** | No models deployed | gpt-5-mini + text-embedding-3-small, GlobalStandard | GlobalStandard is pay-per-token; `ProvisionedManaged` (PTU) is a four-figure monthly commitment and is never selected. The model pair is the cheaper, current default a cost-conscious SME should start on - and, verified live, the two OpenAI models a fresh Sponsorship subscription actually has GlobalStandard quota for. Raise to gpt-4.1 / text-embedding-3-large by editing one map once quota is granted. |
 | **Purge on destroy** | `false`; purge protection on Key Vault | `purge_on_destroy = true`, purge soft-delete on destroy | Deploy-capture-destroy must be repeatable; without this, soft-deleted Key Vault / Foundry names block the next deploy. |
 
 ## Well-Architected Framework mapping
@@ -136,7 +136,7 @@ Approximate UK South list prices, ex VAT. Treat as indicative and confirm agains
 | Container Apps environment | ~£0 idle | Consumption; billed per vCPU-second when an app runs. |
 | Log Analytics | ~£0 idle | Pay-per-GB ingested. |
 | Key Vault / Storage | pennies / day | Per-operation and per-GB. |
-| Azure OpenAI (gpt-4.1, embeddings) | £0 idle | Pay-per-token; nothing until you call it. |
+| Azure OpenAI (gpt-5-mini, embeddings) | £0 idle | Pay-per-token; nothing until you call it. |
 | **Total while running** | **~£0.13-0.15 / hr (~£3.50 / day)** | Dominated by the one Basic AI Search. |
 
 **Money-pit flags - why they stay off (approximate):**

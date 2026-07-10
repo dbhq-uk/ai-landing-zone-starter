@@ -37,16 +37,20 @@ module "ai_landing_zone" {
       create_ai_agent_service    = false # no agent runtime -> no mandatory Cosmos
       enable_diagnostic_settings = true
     }
+    # Model pair chosen for cost and for what a fresh Sponsorship subscription
+    # actually has GlobalStandard quota for: a small, current chat model and the
+    # cheaper embedding model - the sensible default for a cost-conscious SME.
+    # Raise to gpt-4.1 / text-embedding-3-large once quota is granted.
     ai_model_deployments = {
-      "gpt-4.1" = {
-        name  = "gpt-4.1"
-        model = { format = "OpenAI", name = "gpt-4.1", version = "2025-04-14" }
-        scale = { type = "GlobalStandard", capacity = 1 } # GlobalStandard = pay-per-token, never PTU
+      "gpt-5-mini" = {
+        name  = "gpt-5-mini"
+        model = { format = "OpenAI", name = "gpt-5-mini", version = "2025-08-07" }
+        scale = { type = "GlobalStandard", capacity = 10 } # GlobalStandard = pay-per-token, never PTU
       }
-      "text-embedding-3-large" = {
-        name  = "text-embedding-3-large"
-        model = { format = "OpenAI", name = "text-embedding-3-large", version = "1" }
-        scale = { type = "GlobalStandard", capacity = 1 }
+      "text-embedding-3-small" = {
+        name  = "text-embedding-3-small"
+        model = { format = "OpenAI", name = "text-embedding-3-small", version = "1" }
+        scale = { type = "GlobalStandard", capacity = 10 }
       }
     }
     # Foundation BYOR: Key Vault + Storage (required), plus one Basic AI Search as
