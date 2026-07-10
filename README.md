@@ -106,6 +106,8 @@ Each row is a deliberate departure from the pattern module's defaults. "Default"
 | **Edge appliances off** | Firewall/Bastion/VMs default on once standalone | All off via flags | None are needed for a deploy-capture-destroy demo; each is a standing cost. |
 | **App Gateway stub always forwarded** | `app_gateway_definition` defaults to `null` | A complete `deploy = false` stub in `locals.tf` | The module reads `.deploy` without `try()`, so a null value errors at plan time and the object carries five required maps. The wrapper always forwards a valid stub and only toggles `deploy`. |
 | **GlobalStandard models only** | No models deployed | gpt-5-mini + text-embedding-3-small, GlobalStandard | GlobalStandard is pay-per-token; `ProvisionedManaged` (PTU) is a four-figure monthly commitment and is never selected. The model pair is the cheaper, current default a cost-conscious SME should start on - and, verified live, the two OpenAI models a fresh Sponsorship subscription actually has GlobalStandard quota for. Raise to gpt-4.1 / text-embedding-3-large by editing one map once quota is granted. |
+| **Project auto-connections off** | Connections wire Search, Storage **and** a mandatory Cosmos role assignment | `create_project_connections = false` | The module couples project connections to a required Cosmos DB id. Cosmos' only consumer (the agent service) is off, so wiring connections would force an unused Cosmos DB. The project, models, search, Key Vault and Storage still deploy; enabling connections is a one-line change that also switches Cosmos on. |
+| **Firewall public IP (known quirk)** | Standalone mode creates a firewall public IP regardless of `firewall.deploy` | Accepted and documented | The module gates the firewall public IP on standalone mode alone, not on whether a firewall is deployed, so it provisions an orphaned Standard public IP (~£0.005 / hr) even with the firewall off. It cannot be flagged away without adopting a platform hub or a BYO VNet; it disappears in a real ALZ (`flag_platform_landing_zone = true`). A good example of a buried cost the toggles do not cover. |
 | **Purge on destroy** | `false`; purge protection on Key Vault | `purge_on_destroy = true`, purge soft-delete on destroy | Deploy-capture-destroy must be repeatable; without this, soft-deleted Key Vault / Foundry names block the next deploy. |
 
 ## Well-Architected Framework mapping
@@ -133,6 +135,7 @@ Approximate UK South list prices, ex VAT. Treat as indicative and confirm agains
 | AI Search - Basic, 1 replica | ~£0.08 / hr (~£58 / mo) | The only meaningful standing cost. No private-capable tier is cheaper. |
 | Private endpoints (~6-8) | ~£0.05 / hr | ~£0.008 / hr each plus per-GB processing. |
 | Private DNS zones | ~£0.01 / hr | Fractions of a penny per zone. |
+| Firewall public IP (module quirk) | ~£0.005 / hr | Orphaned Standard public IP the module creates in standalone mode; see the decision log. |
 | Container Apps environment | ~£0 idle | Consumption; billed per vCPU-second when an app runs. |
 | Log Analytics | ~£0 idle | Pay-per-GB ingested. |
 | Key Vault / Storage | pennies / day | Per-operation and per-GB. |
