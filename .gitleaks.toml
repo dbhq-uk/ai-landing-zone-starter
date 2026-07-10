@@ -1,0 +1,14 @@
+# Extends the default gitleaks rules with a guard for Azure subscription IDs,
+# so a real subscription id can never be committed (CI fails if one appears).
+# The id belongs in terraform.tfvars (gitignored) or the ARM_SUBSCRIPTION_ID env var.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "azure-subscription-id"
+description = "Azure subscription ID assigned in config - keep it in tfvars/env, never committed"
+regex = '''(?i)subscription_id\s*[=:]\s*["']?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'''
+
+[allowlist]
+description = "documented zero placeholder is fine"
+regexes = ['''00000000-0000-0000-0000-000000000000''']

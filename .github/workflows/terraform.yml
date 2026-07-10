@@ -51,4 +51,4 @@ jobs:
           url=$(curl -sSfL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep -o 'https://[^"]*linux_x64.tar.gz' | head -1)
           curl -sSfL "$url" -o gl.tgz
           tar -xzf gl.tgz gitleaks
-          ./gitleaks detect --source . --redact --no-banner --exit-code 1
+          ./gitleaks detect --source . --config .gitleaks.toml --redact --no-banner --exit-code 1
