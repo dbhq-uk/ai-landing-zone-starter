@@ -99,6 +99,21 @@ exactly as the tables above claim. Regenerate with `scripts/capture-evidence.sh`
 
 ![Deployment evidence](docs/evidence/evidence-sheet.png)
 
+## Smoke test
+
+Deploying is not the same as working. `scripts/smoke-test.sh` proves the estate
+actually functions, in two layers:
+
+- **Control plane** (from anywhere): model deployments `Succeeded`, Search running, private-endpoint connections `Approved`, private DNS A-records present, public access `Disabled`.
+- **Data plane** (from *inside* the VNet): a short-lived Container Apps job in the deployed environment resolves the private FQDN, then calls chat, embeddings and Search over the private path using its own managed identity (AAD, no keys). Container Apps is used rather than a VM so it works even where VM SKUs are restricted.
+
+It earned its keep on the first run: every control-plane check passed, but the
+data-plane DNS check failed - the private zones were empty (see the DNS zone-group
+decision above). One flag later, the re-run is green end to end, including a live
+`gpt-5-mini` completion and a 1536-dimension embedding from inside the VNet:
+
+![Smoke test results](docs/evidence/smoke-results.png)
+
 ## Decision log
 
 Each row is a deliberate departure from the pattern module's defaults. "Default" is what `avm-ptn-aiml-landing-zone` 0.5.1 does out of the box.
@@ -106,6 +121,7 @@ Each row is a deliberate departure from the pattern module's defaults. "Default"
 | Decision | Module default | This reference | Rationale |
 | --- | --- | --- | --- |
 | **Standalone mode** (`flag_platform_landing_zone = false`) | `true` - assumes a platform hub supplies private DNS and egress | `false` | With the flag `true` and no platform hub present, the module creates private endpoints but **no private DNS zones**, so nothing resolves and the private RAG story does not work. `false` makes the module self-contained. In a real ALZ, set it `true` and inherit the hub firewall and central DNS - a one-line change. |
+| **Create DNS zone groups** (`private_dns_zones.azure_policy_pe_zone_linking_enabled = false`) | `true` - assumes an Azure Policy links private endpoints to their DNS zones | `false` | The deepest of the "private" gotchas, and the one the smoke test caught. Left at the default, the module creates the private DNS zones but **not the zone groups** on the endpoints - it expects an Azure Policy to populate the A-records. A bare subscription has no such policy, so the zones stay empty and the private FQDNs never resolve: the deploy "succeeds", every control-plane check passes, but the RAG is unreachable. Setting this `false` makes the module create the zone groups itself. |
 | **APIM off** | **On, `Premium_3`** (the module's single largest cost) | Off; Developer SKU when enabled | The biggest hidden money-pit in the module. Kept in code and documented as the production AI gateway (token metering and per-consumer quotas over Azure OpenAI); when flipped on it uses Developer, not Premium_3. |
 | **AI Search Basic x1** | `standard`, 2 replicas | `basic`, 1 replica | Azure AI Search has no consumption tier and no private-link support below Basic. Basic at one replica is the genuine floor for private RAG and the only meaningful standing cost here. |
 | **Cosmos DB off** | On | Off | Cosmos backs the Foundry agent thread store. The agent service is off (pure retrieve-and-generate needs no thread persistence), so Cosmos is pure idle spend. Turn both on together if you add agents. |
