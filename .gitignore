@@ -20,6 +20,9 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# Captured evidence artifacts (JSON/HTML/PNG) - regenerate with scripts/capture-evidence.sh
+evidence/
+
 # CLI config
 .terraformrc
 terraform.rc
