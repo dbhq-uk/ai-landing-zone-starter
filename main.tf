@@ -7,9 +7,9 @@
 # + Container App environment + Log Analytics), with every money-pit resource
 # flagged off. See README.md for the decision log and Well-Architected mapping.
 
-# Entropy for the Foundry storage account's globally-unique name (see locals.tf).
-resource "random_string" "storage_suffix" {
-  length  = 6
+# Short random suffix for the globally-unique resource names (see locals.tf).
+resource "random_string" "name_unique" {
+  length  = 5
   special = false
   upper   = false
 }
@@ -19,8 +19,8 @@ module "ai_landing_zone" {
   version = "0.5.1"
 
   location            = var.location
-  resource_group_name = local.resource_group_name
-  name_prefix         = var.name_prefix
+  resource_group_name = local.names.resource_group
+  name_prefix         = local.module_name_prefix
   enable_telemetry    = var.enable_telemetry
   tags                = var.tags
 
@@ -33,14 +33,16 @@ module "ai_landing_zone" {
   use_internet_routing       = true # no firewall: send egress straight to the internet
 
   vnet_definition = {
-    name          = "${var.name_prefix}-vnet"
+    name          = local.names.virtual_network
     address_space = ["192.168.0.0/20"] # must sit in 192.168.0.0/16 for Foundry capability-host injection
   }
+  nsgs_definition = { name = local.names.network_security_group }
 
   # --- AI core (the actual workload) ---
   ai_foundry_definition = {
     purge_on_destroy = true
     ai_foundry = {
+      name                       = local.names.ai_foundry
       create_ai_agent_service    = false # no agent runtime -> no mandatory Cosmos
       enable_diagnostic_settings = true
     }
@@ -62,17 +64,18 @@ module "ai_landing_zone" {
     }
     # Foundation BYOR: Key Vault + Storage (required), plus one Basic AI Search as
     # the RAG index, connected to the project below.
-    key_vault_definition       = { this = {} }
-    storage_account_definition = { this = { name = local.foundry_storage_name, endpoints = { blob = { type = "blob" } } } }
+    key_vault_definition       = { this = { name = local.names.key_vault } }
+    storage_account_definition = { this = { name = local.names.storage_account, endpoints = { blob = { type = "blob" } } } }
     ai_search_definition = {
       this = {
+        name          = local.names.ai_search
         sku           = "basic" # Basic is the private-link floor; no consumption tier exists
         replica_count = 1
       }
     }
     ai_projects = {
       rag = {
-        name         = "${var.name_prefix}-rag"
+        name         = local.names.ai_project
         description  = "Secure RAG workload for a regulated UK SME"
         display_name = "Secure RAG"
         # The module couples project auto-connections to a mandatory Cosmos DB
@@ -87,21 +90,21 @@ module "ai_landing_zone" {
   }
 
   # --- App runtime (Consumption -> near-zero idle) plus observability ---
-  container_app_environment_definition = { enable_diagnostic_settings = true }
-  law_definition                       = {}
+  container_app_environment_definition = { name = local.names.container_app_env, enable_diagnostic_settings = true }
+  law_definition                       = { name = local.names.log_analytics }
 
   # --- Duplicate / idle top-level services OFF ---
   genai_key_vault_definition          = { deploy = false }
   genai_cosmosdb_definition           = { deploy = false }
   genai_storage_account_definition    = { deploy = false }
   genai_app_configuration_definition  = { deploy = false }
-  genai_container_registry_definition = { deploy = var.enable_container_registry }
+  genai_container_registry_definition = { deploy = var.enable_container_registry, name = local.names.container_registry }
   ks_ai_search_definition             = { deploy = false } # RAG search is the Foundry BYOR one
   ks_bing_grounding_definition        = { deploy = false } # public grounding contradicts "private"
 
   # --- Money-pit edge, flag-gated OFF by default ---
-  firewall_definition    = { deploy = var.enable_firewall }
-  bastion_definition     = { deploy = var.enable_bastion }
+  firewall_definition    = { deploy = var.enable_firewall, name = local.names.firewall }
+  bastion_definition     = { deploy = var.enable_bastion, name = local.names.bastion }
   jumpvm_definition      = { deploy = var.enable_jump_vm }
   buildvm_definition     = { deploy = var.enable_build_vm }
   app_gateway_definition = local.app_gateway_definition
