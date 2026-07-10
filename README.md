@@ -204,13 +204,21 @@ terraform destroy
 
 ## Capture checklist
 
-Before destroying, capture the evidence for the case study:
+Before destroying, capture the evidence for the case study. The API-level proof
+is automated - run it while the estate is up:
+
+```bash
+scripts/capture-evidence.sh   # writes evidence/evidence.json + evidence-sheet.png
+```
+
+It queries the control plane and renders a one-page sheet proving the data plane
+is private (public access disabled on Search / Key Vault / Foundry), the two
+models are deployed, and every money-pit resource is absent - the authoritative
+API truth rather than a rendered portal blade. For visuals, add optionally:
 
 - [ ] Azure portal - resource group overview showing the deployed resources.
 - [ ] AI Foundry - the project with both model deployments.
-- [ ] A resource (for example AI Search) showing **public network access disabled** and a private endpoint.
 - [ ] Cost analysis / Sponsorships balance view for the running estate.
-- [ ] `terraform output` and `az resource list -g <rg> -o table`.
 
 ## CI
 
