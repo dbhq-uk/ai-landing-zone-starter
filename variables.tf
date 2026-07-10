@@ -9,14 +9,38 @@ variable "location" {
   default     = "uksouth"
 }
 
-variable "name_prefix" {
-  description = "Short (<=10 lowercase alphanumeric) prefix seeding generated resource names."
+# --- CAF naming tokens: names follow <abbr>-<workload>-<environment>-<region>. ---
+
+variable "workload" {
+  description = "Short workload/application token in resource names (CAF naming). Keep <=6 lowercase alphanumeric so globally-unique names (storage, key vault) stay within their 24-char limits."
   type        = string
-  default     = "dbhqairag"
+  default     = "airag"
 
   validation {
-    condition     = can(regex("^[a-z0-9]{1,10}$", var.name_prefix))
-    error_message = "name_prefix must be 1-10 lowercase alphanumeric characters."
+    condition     = can(regex("^[a-z0-9]{1,6}$", var.workload))
+    error_message = "workload must be 1-6 lowercase alphanumeric characters."
+  }
+}
+
+variable "environment" {
+  description = "Environment token in resource names (CAF naming): one of the CAF-listed values."
+  type        = string
+  default     = "prod"
+
+  validation {
+    condition     = contains(["prod", "dev", "qa", "stage", "test"], var.environment)
+    error_message = "environment must be one of: prod, dev, qa, stage, test."
+  }
+}
+
+variable "region_abbreviation" {
+  description = "Short region code in resource names (CAF naming). Keep it consistent with var.location - uks for UK South."
+  type        = string
+  default     = "uks"
+
+  validation {
+    condition     = can(regex("^[a-z0-9]{2,4}$", var.region_abbreviation))
+    error_message = "region_abbreviation must be 2-4 lowercase alphanumeric characters."
   }
 }
 

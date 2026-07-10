@@ -2,9 +2,12 @@
 # TF_VAR_subscription_id=$(az account show --query id -o tsv) instead.
 subscription_id = "00000000-0000-0000-0000-000000000000"
 
-# Optional overrides (defaults shown):
-# location    = "uksouth"
-# name_prefix = "dbhqairag"
+# Optional overrides (defaults shown). Resource names follow the CAF pattern
+# <abbreviation>-<workload>-<environment>-<region>, e.g. rg-airag-prod-uks.
+# location            = "uksouth"
+# workload            = "airag" # <=6 lowercase alphanumeric
+# environment         = "prod"  # prod | dev | qa | stage | test
+# region_abbreviation = "uks"   # keep consistent with location
 
 # Golden path: every money-pit resource is already off by default. Uncomment a
 # flag below only when you accept the standing cost it documents (see README).

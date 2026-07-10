@@ -3,7 +3,7 @@
 
 output "resource_group_name" {
   description = "Resource group the landing zone deploys into."
-  value       = local.resource_group_name
+  value       = local.names.resource_group
 }
 
 output "location" {
