@@ -94,7 +94,9 @@ module "ai_landing_zone" {
   law_definition                       = { name = local.names.log_analytics }
 
   # --- Duplicate / idle top-level services OFF ---
-  genai_key_vault_definition          = { deploy = false }
+  # The platform Key Vault stays off unless an ops VM is enabled - the build and
+  # jump VMs store their generated admin credentials there.
+  genai_key_vault_definition          = { deploy = var.enable_build_vm || var.enable_jump_vm }
   genai_cosmosdb_definition           = { deploy = false }
   genai_storage_account_definition    = { deploy = false }
   genai_app_configuration_definition  = { deploy = false }
