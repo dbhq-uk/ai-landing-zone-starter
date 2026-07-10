@@ -65,12 +65,16 @@ module "ai_landing_zone" {
     }
     ai_projects = {
       rag = {
-        name                       = "${var.name_prefix}-rag"
-        description                = "Secure RAG workload for a regulated UK SME"
-        display_name               = "Secure RAG"
-        create_project_connections = true
-        ai_search_connection       = { new_resource_map_key = "this" }
-        storage_account_connection = { new_resource_map_key = "this" }
+        name         = "${var.name_prefix}-rag"
+        description  = "Secure RAG workload for a regulated UK SME"
+        display_name = "Secure RAG"
+        # The module couples project auto-connections to a mandatory Cosmos DB
+        # role assignment. Cosmos' only consumer - the agent service - is off, so
+        # we leave auto-connection off rather than pay for an unused Cosmos DB.
+        # The project, both models, the search index, Key Vault and Storage all
+        # still deploy privately; enabling connections is a one-line change that
+        # also switches Cosmos on.
+        create_project_connections = false
       }
     }
   }
