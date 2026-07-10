@@ -14,7 +14,11 @@ subscription_id = "00000000-0000-0000-0000-000000000000"
 # enable_apim               = true # AI gateway (Developer SKU when on, not Premium_3)
 # enable_firewall           = true # Azure Firewall
 # enable_bastion            = true # Azure Bastion
-# enable_jump_vm            = true # jumpbox VM
-# enable_build_vm           = true # build/DevOps VM
+# enable_jump_vm            = true # jumpbox VM (needs deployer_ip; VM SKU must be available)
+# enable_build_vm           = true # build/DevOps VM (needs deployer_ip; VM SKU must be available)
 # enable_app_gateway        = true # Application Gateway + WAF v2
 # enable_container_registry = true # Premium ACR
+
+# Only needed when enabling an ops VM (build/jump): the public IP of the machine
+# running Terraform, so it can write the VM credential to the platform Key Vault.
+# deployer_ip = "203.0.113.10"

@@ -1,0 +1,68 @@
+{
+  "resource_group": "rg-airag-prod-uks",
+  "captured": "2026-07-10 23:04 UTC",
+  "passed": 10,
+  "failed": 0,
+  "checks": [
+    {
+      "layer": "control",
+      "check": "deploy:gpt-5-mini",
+      "status": "PASS",
+      "detail": "Succeeded"
+    },
+    {
+      "layer": "control",
+      "check": "deploy:text-embedding-3-small",
+      "status": "PASS",
+      "detail": "Succeeded"
+    },
+    {
+      "layer": "control",
+      "check": "search:status",
+      "status": "PASS",
+      "detail": "running"
+    },
+    {
+      "layer": "control",
+      "check": "pe:foundry",
+      "status": "PASS",
+      "detail": "connection approved"
+    },
+    {
+      "layer": "control",
+      "check": "dns:openai-a-records",
+      "status": "PASS",
+      "detail": "1 record(s)"
+    },
+    {
+      "layer": "control",
+      "check": "net:public-access",
+      "status": "PASS",
+      "detail": "Disabled"
+    },
+    {
+      "layer": "data",
+      "check": "dns-private-ip",
+      "status": "PASS",
+      "detail": "aif-airag-prod-uks-qgsc1.cognitiveservices.azure.com -> 192.168.0.7"
+    },
+    {
+      "layer": "data",
+      "check": "chat-completion",
+      "status": "PASS",
+      "detail": "HTTP 200, 1135 bytes"
+    },
+    {
+      "layer": "data",
+      "check": "embeddings",
+      "status": "PASS",
+      "detail": "HTTP 200, 1536 dims"
+    },
+    {
+      "layer": "data",
+      "check": "search-query",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    }
+  ]
+}
