@@ -34,6 +34,21 @@ locals {
     container_registry  = substr("cr${local.name_stem_nodash}${local.unique}", 0, 24)
   }
 
+  # Platform Key Vault - off unless an ops VM is enabled (the build/jump VMs
+  # store their generated admin credential here). Because the deployer runs
+  # outside the VNet, the vault is opened to var.deployer_ip so Terraform can
+  # write that secret; a private-agent pipeline would keep it fully private.
+  ops_vm_enabled = var.enable_build_vm || var.enable_jump_vm
+  genai_key_vault_definition = {
+    deploy                        = local.ops_vm_enabled
+    public_network_access_enabled = local.ops_vm_enabled
+    network_acls = {
+      bypass         = "AzureServices"
+      default_action = "Deny"
+      ip_rules       = local.ops_vm_enabled && var.deployer_ip != null ? ["${var.deployer_ip}/32"] : []
+    }
+  }
+
   # Seeds the names the module generates itself (private endpoints, NICs, route
   # table, public IP, DNS links). It accepts only <=10 lowercase alphanumerics,
   # so it carries the workload token; those names stay module-controlled.

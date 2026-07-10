@@ -32,6 +32,14 @@ module "ai_landing_zone" {
   flag_platform_landing_zone = false
   use_internet_routing       = true # no firewall: send egress straight to the internet
 
+  # A bare subscription has no Azure Policy to link private endpoints to their
+  # DNS zones, so the module must create the DNS zone groups itself. Left at the
+  # default (true) the zones stay empty and the private FQDNs never resolve - the
+  # RAG is unreachable despite the deploy "succeeding". Caught by the smoke test.
+  private_dns_zones = {
+    azure_policy_pe_zone_linking_enabled = false
+  }
+
   vnet_definition = {
     name          = local.names.virtual_network
     address_space = ["192.168.0.0/20"] # must sit in 192.168.0.0/16 for Foundry capability-host injection
@@ -94,9 +102,8 @@ module "ai_landing_zone" {
   law_definition                       = { name = local.names.log_analytics }
 
   # --- Duplicate / idle top-level services OFF ---
-  # The platform Key Vault stays off unless an ops VM is enabled - the build and
-  # jump VMs store their generated admin credentials there.
-  genai_key_vault_definition          = { deploy = var.enable_build_vm || var.enable_jump_vm }
+  # Platform Key Vault only when an ops VM needs it (see locals.tf).
+  genai_key_vault_definition          = local.genai_key_vault_definition
   genai_cosmosdb_definition           = { deploy = false }
   genai_storage_account_definition    = { deploy = false }
   genai_app_configuration_definition  = { deploy = false }
