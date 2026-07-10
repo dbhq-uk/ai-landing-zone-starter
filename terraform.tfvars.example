@@ -1,2 +1,17 @@
-# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+# Copy to terraform.tfvars (gitignored) and set your subscription id, or export
+# TF_VAR_subscription_id=$(az account show --query id -o tsv) instead.
 subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# Optional overrides (defaults shown):
+# location    = "uksouth"
+# name_prefix = "dbhqairag"
+
+# Golden path: every money-pit resource is already off by default. Uncomment a
+# flag below only when you accept the standing cost it documents (see README).
+# enable_apim               = true # AI gateway (Developer SKU when on, not Premium_3)
+# enable_firewall           = true # Azure Firewall
+# enable_bastion            = true # Azure Bastion
+# enable_jump_vm            = true # jumpbox VM
+# enable_build_vm           = true # build/DevOps VM
+# enable_app_gateway        = true # Application Gateway + WAF v2
+# enable_container_registry = true # Premium ACR
