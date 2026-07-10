@@ -4,7 +4,10 @@
 *.tfstate.*
 crash.log
 crash.*.log
+# Saved plan files (any name) - may embed state and ids, never commit
 *.tfplan
+tfplan
+tfplan*
 
 # Variables may hold real ids - keep only the example
 *.tfvars
