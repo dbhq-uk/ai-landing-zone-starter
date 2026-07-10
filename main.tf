@@ -1,13 +1,94 @@
-# Reference deployment of the official Azure AI Landing Zone.
+# Secure RAG / AI-app landing zone for a regulated UK SME, built on the official
+# Azure Verified Module. This root module adds only opinion and guardrails - it
+# does not reinvent anything the pattern module already does.
 #
-# First real task: wire in the AVM pattern module and an opinionated golden-path
-# config for the "secure RAG / AI-app for a regulated UK SME" scenario. Check the
-# current module version and inputs before uncommenting.
-#
-#   module "ai_landing_zone" {
-#     source  = "Azure/avm-ptn-aiml-landing-zone/azurerm"
-#     version = "~> 0.1" # confirm latest on the Terraform Registry
-#
-#     # ... opinionated golden-path inputs for the scenario ...
-#     # money-pit resources (firewall, ddos, app gateway) default OFF via variables.
-#   }
+# Golden path: a minimal, genuinely-private RAG platform (AI Foundry + one
+# project + two GlobalStandard models + one Basic AI Search + Key Vault + Storage
+# + Container App environment + Log Analytics), with every money-pit resource
+# flagged off. See README.md for the decision log and Well-Architected mapping.
+
+module "ai_landing_zone" {
+  source  = "Azure/avm-ptn-aiml-landing-zone/azurerm"
+  version = "0.5.1"
+
+  location            = var.location
+  resource_group_name = local.resource_group_name
+  name_prefix         = var.name_prefix
+  enable_telemetry    = var.enable_telemetry
+  tags                = var.tags
+
+  # Standalone: no shared platform hub exists, so the module must create its own
+  # private DNS zones - otherwise the private endpoints have nowhere to resolve
+  # and the "private RAG" story does not actually work. Edge appliances are then
+  # explicitly disabled below for cost. In a real ALZ set this true and inherit
+  # the hub firewall plus central private DNS.
+  flag_platform_landing_zone = false
+  use_internet_routing       = true # no firewall: send egress straight to the internet
+
+  vnet_definition = {
+    name          = "${var.name_prefix}-vnet"
+    address_space = ["192.168.0.0/20"] # must sit in 192.168.0.0/16 for Foundry capability-host injection
+  }
+
+  # --- AI core (the actual workload) ---
+  ai_foundry_definition = {
+    purge_on_destroy = true
+    ai_foundry = {
+      create_ai_agent_service    = false # no agent runtime -> no mandatory Cosmos
+      enable_diagnostic_settings = true
+    }
+    ai_model_deployments = {
+      "gpt-4.1" = {
+        name  = "gpt-4.1"
+        model = { format = "OpenAI", name = "gpt-4.1", version = "2025-04-14" }
+        scale = { type = "GlobalStandard", capacity = 1 } # GlobalStandard = pay-per-token, never PTU
+      }
+      "text-embedding-3-large" = {
+        name  = "text-embedding-3-large"
+        model = { format = "OpenAI", name = "text-embedding-3-large", version = "1" }
+        scale = { type = "GlobalStandard", capacity = 1 }
+      }
+    }
+    # Foundation BYOR: Key Vault + Storage (required), plus one Basic AI Search as
+    # the RAG index, connected to the project below.
+    key_vault_definition       = { this = {} }
+    storage_account_definition = { this = { endpoints = { blob = { type = "blob" } } } }
+    ai_search_definition = {
+      this = {
+        sku           = "basic" # Basic is the private-link floor; no consumption tier exists
+        replica_count = 1
+      }
+    }
+    ai_projects = {
+      rag = {
+        name                       = "${var.name_prefix}-rag"
+        description                = "Secure RAG workload for a regulated UK SME"
+        display_name               = "Secure RAG"
+        create_project_connections = true
+        ai_search_connection       = { new_resource_map_key = "this" }
+        storage_account_connection = { new_resource_map_key = "this" }
+      }
+    }
+  }
+
+  # --- App runtime (Consumption -> near-zero idle) plus observability ---
+  container_app_environment_definition = { enable_diagnostic_settings = true }
+  law_definition                       = {}
+
+  # --- Duplicate / idle top-level services OFF ---
+  genai_key_vault_definition          = { deploy = false }
+  genai_cosmosdb_definition           = { deploy = false }
+  genai_storage_account_definition    = { deploy = false }
+  genai_app_configuration_definition  = { deploy = false }
+  genai_container_registry_definition = { deploy = var.enable_container_registry }
+  ks_ai_search_definition             = { deploy = false } # RAG search is the Foundry BYOR one
+  ks_bing_grounding_definition        = { deploy = false } # public grounding contradicts "private"
+
+  # --- Money-pit edge, flag-gated OFF by default ---
+  firewall_definition    = { deploy = var.enable_firewall }
+  bastion_definition     = { deploy = var.enable_bastion }
+  jumpvm_definition      = { deploy = var.enable_jump_vm }
+  buildvm_definition     = { deploy = var.enable_build_vm }
+  app_gateway_definition = local.app_gateway_definition
+  apim_definition        = local.apim_definition
+}
