@@ -90,6 +90,15 @@ Dashed nodes are money-pit or unneeded resources the pattern module deploys by d
 | Bing grounding | Off | A public-internet grounding source contradicts the private-only design. |
 | DDoS Standard / provisioned throughput (PTU) | Off | Never created; models are GlobalStandard only. |
 
+## Deployment evidence
+
+Deployed for real, captured from the Azure control plane, then torn down. The
+data plane is private (public access disabled on Search, Key Vault and Foundry),
+both models are live on GlobalStandard, and every money-pit resource is absent -
+exactly as the tables above claim. Regenerate with `scripts/capture-evidence.sh`.
+
+![Deployment evidence](docs/evidence/evidence-sheet.png)
+
 ## Decision log
 
 Each row is a deliberate departure from the pattern module's defaults. "Default" is what `avm-ptn-aiml-landing-zone` 0.5.1 does out of the box.
