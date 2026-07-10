@@ -20,8 +20,9 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Captured evidence artifacts (JSON/HTML/PNG) - regenerate with scripts/capture-evidence.sh
-evidence/
+# Local capture output (root only) - regenerate with scripts/capture-evidence.sh.
+# The committed sample lives under docs/evidence/.
+/evidence/
 
 # CLI config
 .terraformrc

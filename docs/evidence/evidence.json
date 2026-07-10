@@ -1,0 +1,49 @@
+{
+  "resource_group": "rg-airag-prod-uks",
+  "captured": "2026-07-10 18:32 UTC",
+  "resource_count": 61,
+  "private_data_plane": {
+    "ai_search": {
+      "name": "srch-airag-prod-uks-qgsc1",
+      "partitions": 1,
+      "publicNetworkAccess": "Disabled",
+      "replicas": 1,
+      "sku": "basic"
+    },
+    "key_vault": {
+      "name": "kv-airag-prod-uks-qgsc1",
+      "publicNetworkAccess": "Disabled"
+    },
+    "ai_foundry": {
+      "name": "aif-airag-prod-uks-qgsc1",
+      "publicNetworkAccess": "Disabled"
+    }
+  },
+  "models": [
+    {
+      "capacity": 10,
+      "model": "text-embedding-3-small",
+      "name": "text-embedding-3-small",
+      "sku": "GlobalStandard",
+      "version": "1"
+    },
+    {
+      "capacity": 10,
+      "model": "gpt-5-mini",
+      "name": "gpt-5-mini",
+      "sku": "GlobalStandard",
+      "version": "2025-08-07"
+    }
+  ],
+  "private_endpoints": 4,
+  "private_dns_zones": 21,
+  "money_pit_absent": {
+    "Virtual Machine": 0,
+    "Cosmos DB": 0,
+    "API Management": 0,
+    "Application Gateway": 0,
+    "Azure Firewall": 0,
+    "Container Registry": 0,
+    "Bastion": 0
+  }
+}
