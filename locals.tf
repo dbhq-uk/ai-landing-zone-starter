@@ -1,6 +1,11 @@
 locals {
   resource_group_name = "rg-${var.name_prefix}-uks"
 
+  # The Foundry BYOR storage auto-name (prefix + key + "fndrysa" + token) can
+  # exceed the 24-char storage-account limit even from a valid name_prefix, so we
+  # give it an explicit, bounded, globally-unique name instead.
+  foundry_storage_name = "${var.name_prefix}sa${random_string.storage_suffix.result}"
+
   # App Gateway: the module reads app_gateway_definition.deploy without try(), so
   # a null value errors at plan time and the object has five required maps. We
   # therefore always forward a complete, valid stub and only toggle deploy.

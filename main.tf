@@ -7,6 +7,13 @@
 # + Container App environment + Log Analytics), with every money-pit resource
 # flagged off. See README.md for the decision log and Well-Architected mapping.
 
+# Entropy for the Foundry storage account's globally-unique name (see locals.tf).
+resource "random_string" "storage_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
 module "ai_landing_zone" {
   source  = "Azure/avm-ptn-aiml-landing-zone/azurerm"
   version = "0.5.1"
@@ -56,7 +63,7 @@ module "ai_landing_zone" {
     # Foundation BYOR: Key Vault + Storage (required), plus one Basic AI Search as
     # the RAG index, connected to the project below.
     key_vault_definition       = { this = {} }
-    storage_account_definition = { this = { endpoints = { blob = { type = "blob" } } } }
+    storage_account_definition = { this = { name = local.foundry_storage_name, endpoints = { blob = { type = "blob" } } } }
     ai_search_definition = {
       this = {
         sku           = "basic" # Basic is the private-link floor; no consumption tier exists
