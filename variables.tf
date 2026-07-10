@@ -104,3 +104,14 @@ variable "enable_container_registry" {
   type        = bool
   default     = false
 }
+
+variable "deployer_ip" {
+  description = "Public IP of the machine running Terraform. Only used when an ops VM is enabled: the platform Key Vault (which stores the VM credential) is opened to this IP so the external deployer can write the secret. A private-agent pipeline would not need this."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.deployer_ip == null || can(regex("^[0-9.]+$", var.deployer_ip))
+    error_message = "deployer_ip must be an IPv4 address or null."
+  }
+}
