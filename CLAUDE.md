@@ -10,7 +10,7 @@ Public proof-of-worth repo for DBHQ Consulting. An opinionated reference *deploy
 
 ## Conventions
 
-- Terraform: `terraform fmt` before committing; keep `validate`, `tflint`, `trivy` green.
+- Terraform: `terraform fmt` before committing; keep `validate`, `tflint`, `checkov` green.
 - No secrets or real subscription ids in the repo. `terraform.tfvars` is gitignored; authenticate via `az login` / OIDC.
 - British English, plain hyphens (never em/en dashes), conventional-commit messages.
 

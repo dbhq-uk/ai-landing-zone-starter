@@ -5,6 +5,6 @@
 ## Checklist
 
 - [ ] `terraform fmt` clean, `validate` passes
-- [ ] `tflint` and `trivy` green
+- [ ] `tflint` and `checkov` green
 - [ ] No secrets or real subscription ids committed
 - [ ] This change does not add a teardown of the standing budget or state backend
