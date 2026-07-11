@@ -160,7 +160,7 @@ How the configuration maps to the five pillars - the same lens an Azure Well-Arc
 
 **Cost Optimisation.** The core discipline. Consumption and serverless tiers throughout: pay-per-token models, Consumption Container Apps, per-operation Key Vault. Every always-on appliance (Firewall, Bastion, APIM, App Gateway, ACR) is off by default. The one irreducible standing cost - Basic AI Search - is called out explicitly rather than buried. Tags carry a cost-centre for showback.
 
-**Operational Excellence.** Everything is code: one pinned module version, a remote state backend, and CI that runs `fmt`, `validate`, `tflint`, `trivy` and `gitleaks` on every change. Diagnostics flow to Log Analytics. `purge_on_destroy` makes the environment reproducible. The decision log is the operational record of why the estate looks as it does.
+**Operational Excellence.** Everything is code: one pinned module version, a remote state backend, and CI that runs `fmt`, `validate`, `tflint`, `checkov` and `gitleaks` on every change. Diagnostics flow to Log Analytics. `purge_on_destroy` makes the environment reproducible. The decision log is the operational record of why the estate looks as it does.
 
 **Reliability.** The private DNS and endpoint topology is created deterministically by the module. For a demo, single-replica Search and consumption tiers are deliberate; the same code scales up by raising `replica_count` and enabling zone-redundant tiers. Remote state with locking prevents concurrent-apply corruption.
 
@@ -247,7 +247,7 @@ API truth rather than a rendered portal blade. For visuals, add optionally:
 
 ## CI
 
-Static checks only (no cloud credentials in CI): `terraform fmt` / `validate`, `tflint` (+ Azure ruleset), `trivy` IaC scan, and `gitleaks` secret scan (which fails the build if a real subscription id is ever committed).
+Static checks only (no cloud credentials in CI): `terraform fmt` / `validate`, `tflint` (+ Azure ruleset), `checkov` IaC scan, and `gitleaks` secret scan (which fails the build if a real subscription id is ever committed).
 
 ## Licence
 

@@ -41,10 +41,10 @@ jobs:
           tflint --init
           tflint -f compact
 
-      - name: trivy iac scan
+      - name: checkov iac scan
         run: |
-          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-          trivy config --severity HIGH,CRITICAL --exit-code 1 --skip-dirs .terraform .
+          pipx install checkov
+          checkov -d . --framework terraform --download-external-modules false --skip-path .terraform --quiet --compact
 
       - name: gitleaks
         run: |
