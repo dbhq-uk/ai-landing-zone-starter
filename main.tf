@@ -17,7 +17,7 @@ resource "random_string" "name_unique" {
 module "ai_landing_zone" {
   # checkov:skip=CKV_TF_1: registry modules are pinned by immutable version, not a git commit hash
   source  = "Azure/avm-ptn-aiml-landing-zone/azurerm"
-  version = "0.5.1"
+  version = "0.5.2"
 
   location            = var.location
   resource_group_name = local.names.resource_group
