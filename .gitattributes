@@ -2,3 +2,9 @@
 *.tf text eol=lf
 *.md text eol=lf
 *.hcl text eol=lf
+
+# GitHub language detection (linguist). This is a Terraform deployment - every
+# .tf file is at the repository root. The two helper scripts under scripts/ are
+# evidence capture and a smoke test, not the point of the repo, and they were
+# outweighing the Terraform and making GitHub report the language as Shell.
+scripts/** linguist-vendored
